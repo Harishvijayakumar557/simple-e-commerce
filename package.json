@@ -1,0 +1,13 @@
+{
+  "name": "simple-shop",
+  "version": "1.0.0",
+  "description": "Simple e-commerce demo with HTML, CSS, and Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "name": "Canvas Tote",
+    "price": 24.99,
+    "image": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=400&fit=crop",
+    "description": "Sturdy everyday tote in natural canvas."
+  },
+  {
+    "id": "2",
+    "name": "Ceramic Mug",
+    "price": 16.5,
+    "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&h=400&fit=crop",
+    "description": "Matte glaze, dishwasher safe."
+  },
+  {
+    "id": "3",
+    "name": "Wireless Earbuds",
+    "price": 79.99,
+    "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=400&fit=crop",
+    "description": "Compact case, 24h total playback."
+  },
+  {
+    "id": "4",
+    "name": "Desk Lamp",
+    "price": 45,
+    "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop",
+    "description": "Warm LED, adjustable arm."
+  },
+  {
+    "id": "5",
+    "name": "Notebook Set",
+    "price": 12.99,
+    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=400&fit=crop",
+    "description": "Three lined notebooks, recycled paper."
+  },
+  {
+    "id": "6",
+    "name": "Water Bottle",
+    "price": 28,
+    "image": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop",
+    "description": "Insulated stainless steel, 750ml."
+  }
+]

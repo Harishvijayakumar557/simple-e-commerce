@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northline — Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="logo" href="/">North<span>line</span></a>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/products.html" aria-current="page">Shop</a>
+          <a class="cart-link" href="/cart.html">Cart <span class="cart-count" aria-live="polite"></span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-intro">
+        <h1>All products</h1>
+        <p>Add items to your cart. Prices and images are for demonstration only.</p>
+      </div>
+      <div id="catalog" class="product-grid">
+        <p class="loading">Loading products…</p>
+      </div>
+    </main>
+
+    <footer class="site-footer">Simple demo — not a real store.</footer>
+
+    <script src="/js/shop.js"></script>
+    <script>
+      Shop.updateCartBadge();
+      window.addEventListener("cart-updated", function () {
+        Shop.updateCartBadge();
+      });
+
+      var container = document.getElementById("catalog");
+
+      Shop.fetchProducts()
+        .then(function (products) {
+          container.innerHTML = "";
+          products.forEach(function (p) {
+            var article = document.createElement("article");
+            article.className = "card";
+            article.innerHTML =
+              '<img class="card-image" src="' +
+              p.image +
+              '" alt="" loading="lazy" />' +
+              '<div class="card-body">' +
+              "<h3>" +
+              p.name +
+              "</h3>" +
+              "<p>" +
+              p.description +
+              "</p>" +
+              '<div class="card-footer">' +
+              '<span class="price">' +
+              Shop.formatPrice(p.price) +
+              "</span>" +
+              '<button type="button" class="btn btn-primary btn-add" data-id="' +
+              p.id +
+              '">Add to cart</button>' +
+              "</div></div>";
+            container.appendChild(article);
+          });
+
+          container.querySelectorAll(".btn-add").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              Shop.addToCart(btn.getAttribute("data-id"), 1);
+            });
+          });
+        })
+        .catch(function () {
+          container.innerHTML = '<p class="error-msg">Could not load products. Is the server running?</p>';
+        });
+    </script>
+  </body>
+</html>

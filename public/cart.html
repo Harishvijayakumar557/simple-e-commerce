@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northline — Cart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="logo" href="/">North<span>line</span></a>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/products.html">Shop</a>
+          <a class="cart-link" href="/cart.html" aria-current="page">Cart <span class="cart-count" aria-live="polite"></span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-intro">
+        <h1>Your cart</h1>
+        <p>Review items and place a demo order (saved on the server as JSON).</p>
+      </div>
+
+      <div id="success-panel" class="order-success" hidden>
+        <h2>Order placed</h2>
+        <p>Reference: <strong id="order-id"></strong></p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 1rem">
+          <a href="/products.html">Continue shopping</a>
+        </p>
+      </div>
+
+      <div id="cart-panel" class="cart-layout">
+        <div>
+          <ul id="cart-list" class="cart-list"></ul>
+          <p id="empty-msg" class="loading" hidden>Your cart is empty. <a href="/products.html">Browse products</a>.</p>
+        </div>
+        <aside class="summary">
+          <h2>Summary</h2>
+          <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+          <div class="summary-row"><span>Shipping</span><span>Free (demo)</span></div>
+          <div class="summary-row total"><span>Total</span><span id="total">$0.00</span></div>
+          <form id="checkout-form" class="checkout-form">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required autocomplete="name" placeholder="Jane Doe" />
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
+            <button type="submit" class="btn btn-primary">Place order</button>
+          </form>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">Simple demo — not a real store.</footer>
+
+    <script src="/js/shop.js"></script>
+    <script>
+      var listEl = document.getElementById("cart-list");
+      var emptyMsg = document.getElementById("empty-msg");
+      var subtotalEl = document.getElementById("subtotal");
+      var totalEl = document.getElementById("total");
+      var cartPanel = document.getElementById("cart-panel");
+      var successPanel = document.getElementById("success-panel");
+      var orderIdEl = document.getElementById("order-id");
+      var productMap = {};
+
+      Shop.updateCartBadge();
+      window.addEventListener("cart-updated", function () {
+        Shop.updateCartBadge();
+        render();
+      });
+
+      function render() {
+        var cart = Shop.getCart();
+        var ids = Object.keys(cart).filter(function (id) {
+          return cart[id] > 0;
+        });
+
+        if (ids.length === 0) {
+          listEl.innerHTML = "";
+          emptyMsg.hidden = false;
+          subtotalEl.textContent = Shop.formatPrice(0);
+          totalEl.textContent = Shop.formatPrice(0);
+          return;
+        }
+
+        emptyMsg.hidden = true;
+        var sub = 0;
+        listEl.innerHTML = "";
+
+        ids.forEach(function (id) {
+          var p = productMap[id];
+          if (!p) return;
+          var qty = cart[id];
+          var line = p.price * qty;
+          sub += line;
+
+          var li = document.createElement("li");
+          li.className = "cart-item";
+          li.innerHTML =
+            '<img src="' +
+            p.image +
+            '" alt="" />' +
+            '<div class="cart-item-info"><h3>' +
+            p.name +
+            '</h3><p class="unit">' +
+            Shop.formatPrice(p.price) +
+            " × " +
+            qty +
+            "</p></div>" +
+            '<div class="cart-item-actions"><p class="price">' +
+            Shop.formatPrice(line) +
+            '</p><div class="qty-control">' +
+            '<button type="button" aria-label="Decrease" data-act="dec" data-id="' +
+            id +
+            '">−</button>' +
+            "<span>" +
+            qty +
+            "</span>" +
+            '<button type="button" aria-label="Increase" data-act="inc" data-id="' +
+            id +
+            '">+</button>' +
+            '</div><button type="button" class="remove-btn" data-id="' +
+            id +
+            '">Remove</button></div>';
+
+          listEl.appendChild(li);
+        });
+
+        listEl.querySelectorAll('button[data-act="dec"]').forEach(function (b) {
+          b.addEventListener("click", function () {
+            var id = b.getAttribute("data-id");
+            var q = Shop.getCart()[id] || 0;
+            Shop.setLineQty(id, q - 1);
+          });
+        });
+        listEl.querySelectorAll('button[data-act="inc"]').forEach(function (b) {
+          b.addEventListener("click", function () {
+            var id = b.getAttribute("data-id");
+            var q = Shop.getCart()[id] || 0;
+            Shop.setLineQty(id, q + 1);
+          });
+        });
+        listEl.querySelectorAll(".remove-btn").forEach(function (b) {
+          b.addEventListener("click", function () {
+            Shop.removeLine(b.getAttribute("data-id"));
+          });
+        });
+
+        subtotalEl.textContent = Shop.formatPrice(sub);
+        totalEl.textContent = Shop.formatPrice(sub);
+      }
+
+      Shop.fetchProducts()
+        .then(function (products) {
+          products.forEach(function (p) {
+            productMap[p.id] = p;
+          });
+          render();
+        })
+        .catch(function () {
+          listEl.innerHTML = '<li class="error-msg">Could not load catalog.</li>';
+        });
+
+      document.getElementById("checkout-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var cart = Shop.getCart();
+        var lines = [];
+        Object.keys(cart).forEach(function (id) {
+          var p = productMap[id];
+          if (!p || cart[id] <= 0) return;
+          lines.push({
+            productId: id,
+            name: p.name,
+            price: p.price,
+            quantity: cart[id],
+          });
+        });
+        if (lines.length === 0) return;
+
+        var name = document.getElementById("name").value.trim();
+        var email = document.getElementById("email").value.trim();
+        var payload = { customer: { name: name, email: email }, lines: lines };
+
+        fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then(function (res) {
+            return res.json().then(function (data) {
+              if (!res.ok) throw new Error(data.error || "Order failed");
+              return data;
+            });
+          })
+          .then(function (data) {
+            Shop.setCart({});
+            orderIdEl.textContent = data.orderId;
+            cartPanel.hidden = true;
+            successPanel.hidden = false;
+            Shop.updateCartBadge();
+          })
+          .catch(function () {
+            alert("Could not place order. Try again.");
+          });
+      });
+    </script>
+  </body>
+</html>
